@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title }} – SecureNotepad{% endblock %}
+
+{% block extra_head %}
+<style>
+  .view-wrap { max-width: 700px; margin: 2rem auto; }
+
+  .view-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .view-header h1 {
+    font-size: 1.6rem;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .note-body {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.8;
+    font-size: .95rem;
+    color: var(--text);
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 1.4rem;
+    min-height: 120px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    font-size: .8rem;
+    color: var(--muted);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="view-wrap">
+  <div class="view-header">
+    <div>
+      <a href="{{ url_for('notes.dashboard') }}" style="font-size:.85rem; color:var(--muted); text-decoration:none;">
+        ← Dashboard
+      </a>
+      <h1 style="margin-top:.4rem;">{{ note.title }}</h1>
+    </div>
+    <div class="flex gap-1" style="flex-wrap:wrap; align-items:center;">
+      <a href="{{ url_for('notes.edit_note', note_id=note.id) }}" class="btn btn-primary btn-sm">✏️ Edit</a>
+      <form method="POST" action="{{ url_for('notes.delete_note', note_id=note.id) }}"
+            onsubmit="return confirm('Delete this note?');">
+        <button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="note-body">{{ note.content }}</div>
+    <div class="meta-row">
+      <span>📅 Created: {{ note.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+      <span>🔄 Updated: {{ note.updated_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

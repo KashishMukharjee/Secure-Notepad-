@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – SecureNotepad{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.6rem;
+    color: var(--text);
+  }
+
+  .dashboard-header p {
+    color: var(--muted);
+    font-size: .9rem;
+    margin-top: .2rem;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .note-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .note-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(108,99,255,.2);
+  }
+
+  .note-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .note-preview {
+    font-size: .85rem;
+    color: var(--muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .note-meta {
+    font-size: .75rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  .note-actions {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+  }
+
+  .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
+  .empty-state h2 { font-size: 1.3rem; color: var(--text); margin-bottom: .5rem; }
+
+  .stats-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: .4rem 1rem;
+    font-size: .82rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  .stat-chip strong { color: var(--accent2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div>
+    <h1>📓 My Notes</h1>
+    <p>Hello, <strong style="color:var(--accent2);">{{ user.username }}</strong> — here are all your notes.</p>
+  </div>
+  <a href="{{ url_for('notes.new_note') }}" class="btn btn-primary">
+    ✏️ New Note
+  </a>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-chip">📄 Total Notes: <strong>{{ notes|length }}</strong></div>
+  <div class="stat-chip">📧 {{ user.email }}</div>
+  <div class="stat-chip">📅 Member since {{ user.created_at.strftime('%b %Y') }}</div>
+</div>
+
+{% if notes %}
+  <div class="notes-grid">
+    {% for note in notes %}
+    <div class="note-card">
+      <div class="note-title" title="{{ note.title }}">{{ note.title }}</div>
+      <div class="note-preview">{{ note.content }}</div>
+      <div class="note-meta">
+        🕒 {{ note.updated_at.strftime('%d %b %Y, %I:%M %p') }}
+      </div>
+      <div class="note-actions">
+        <a href="{{ url_for('notes.view_note', note_id=note.id) }}" class="btn btn-ghost btn-sm">👁 View</a>
+        <a href="{{ url_for('notes.edit_note', note_id=note.id) }}" class="btn btn-primary btn-sm">✏️ Edit</a>
+        <form method="POST" action="{{ url_for('notes.delete_note', note_id=note.id) }}"
+              onsubmit="return confirm('Delete this note?');" style="display:inline;">
+          <button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="icon">📭</div>
+    <h2>No notes yet</h2>
+    <p>Start capturing your thoughts securely.</p>
+    <a href="{{ url_for('notes.new_note') }}" class="btn btn-primary" style="margin-top:1.2rem;">
+      ✏️ Create Your First Note
+    </a>
+  </div>
+{% endif %}
+{% endblock %}

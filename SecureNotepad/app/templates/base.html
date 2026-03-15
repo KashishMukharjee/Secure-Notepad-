@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}SecureNotepad{% endblock %}</title>
+  <style>
+    
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #22263a;
+      --border:    #2e3250;
+      --accent:    #6c63ff;
+      --accent2:   #a78bfa;
+      --danger:    #ef4444;
+      --success:   #22c55e;
+      --warning:   #f59e0b;
+      --info:      #38bdf8;
+      --text:      #e2e8f0;
+      --muted:     #94a3b8;
+      --radius:    12px;
+      --shadow:    0 4px 24px rgba(0,0,0,.45);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.4);
+    }
+
+    .nav-brand {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent2);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .nav-brand span { font-size: 1.4rem; }
+
+    .nav-links { display: flex; align-items: center; gap: 1rem; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .9rem;
+      padding: .4rem .8rem;
+      border-radius: 8px;
+      transition: background .2s, color .2s;
+    }
+
+    .nav-links a:hover { background: var(--surface2); color: var(--text); }
+
+    .nav-user {
+      font-size: .85rem;
+      color: var(--accent2);
+      background: rgba(108,99,255,.15);
+      padding: .3rem .8rem;
+      border-radius: 20px;
+    }
+
+    
+    main { flex: 1; padding: 2rem; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    
+    .flash-container { margin-bottom: 1.5rem; }
+
+    .flash {
+      padding: .85rem 1.2rem;
+      border-radius: var(--radius);
+      margin-bottom: .6rem;
+      font-size: .9rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      animation: slideIn .3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .flash-success { background: rgba(34,197,94,.15);  border: 1px solid rgba(34,197,94,.3);  color: #86efac; }
+    .flash-danger  { background: rgba(239,68,68,.15);  border: 1px solid rgba(239,68,68,.3);  color: #fca5a5; }
+    .flash-warning { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.3); color: #fcd34d; }
+    .flash-info    { background: rgba(56,189,248,.15); border: 1px solid rgba(56,189,248,.3); color: #7dd3fc; }
+
+    
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+   
+    .form-group { margin-bottom: 1.2rem; }
+
+    label {
+      display: block;
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: .4rem;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      color: var(--text);
+      font-size: .95rem;
+      font-family: inherit;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,.2);
+    }
+
+    textarea { resize: vertical; min-height: 140px; }
+
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .65rem 1.4rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity .2s, transform .1s;
+    }
+
+    .btn:active { transform: scale(.97); }
+    .btn:hover  { opacity: .88; }
+
+    .btn-primary  { background: var(--accent);  color: #fff; }
+    .btn-success  { background: var(--success);  color: #fff; }
+    .btn-danger   { background: var(--danger);   color: #fff; }
+    .btn-ghost    { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-sm       { padding: .4rem .9rem; font-size: .8rem; }
+
+    
+    .strength-bar-wrap {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 4px;
+      margin-top: .5rem;
+      overflow: hidden;
+    }
+
+    .strength-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .4s ease, background .4s ease;
+      width: 0%;
+    }
+
+    .strength-label {
+      font-size: .78rem;
+      margin-top: .3rem;
+      font-weight: 600;
+    }
+
+    .strength-tips {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: .3rem;
+      list-style: none;
+    }
+
+    .strength-tips li::before { content: "• "; color: var(--warning); }
+
+    
+    footer {
+      text-align: center;
+      padding: 1.2rem;
+      font-size: .8rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    
+    .text-center { text-align: center; }
+    .mt-1 { margin-top: .5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .flex { display: flex; }
+    .gap-1 { gap: .5rem; }
+    .gap-2 { gap: 1rem; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .w-full { width: 100%; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="{{ url_for('notes.dashboard') if session.get('user_id') else url_for('auth.login') }}">
+    <span>🔐</span> SecureNotepad
+  </a>
+  <div class="nav-links">
+    <a href="{{ url_for('auth.about') }}">About</a>
+    <a href="{{ url_for('auth.contact') }}">Contact</a>
+    {% if session.get('user_id') %}
+      <span class="nav-user">👤 {{ session.get('username') }}</span>
+      <a href="{{ url_for('notes.new_note') }}">+ New Note</a>
+      <a href="{{ url_for('auth.logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}">Login</a>
+      <a href="{{ url_for('auth.register') }}">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">
+            {% if category == 'success' %}✅{% elif category == 'danger' %}❌{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  &copy; 2025 SecureNotepad &mdash; Your notes, secured.
+</footer>
+
+</body>
+</html>

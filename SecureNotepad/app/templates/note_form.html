@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Note – SecureNotepad{% endblock %}
+
+{% block extra_head %}
+<style>
+  .note-form-wrap { max-width: 700px; margin: 2rem auto; }
+
+  .form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .form-header h1 { font-size: 1.5rem; }
+
+  textarea#content {
+    min-height: 260px;
+    font-family: 'Courier New', monospace;
+    font-size: .92rem;
+    line-height: 1.6;
+  }
+
+  .char-count {
+    font-size: .75rem;
+    color: var(--muted);
+    text-align: right;
+    margin-top: .3rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="note-form-wrap">
+  <div class="form-header">
+    <h1>{{ '✏️ Edit Note' if action == 'Edit' else '📝 New Note' }}</h1>
+    <a href="{{ url_for('notes.dashboard') }}" class="btn btn-ghost">← Back</a>
+  </div>
+
+  <div class="card">
+    <form method="POST">
+      <div class="form-group">
+        <label for="title">Note Title</label>
+        <input type="text" id="title" name="title"
+               placeholder="Give your note a title…"
+               value="{{ note.title if note else '' }}"
+               required maxlength="200" autofocus />
+      </div>
+
+      <div class="form-group">
+        <label for="content">Content</label>
+        <textarea id="content" name="content"
+                  placeholder="Write your note here…"
+                  required maxlength="10000"
+                  oninput="updateCount(this)">{{ note.content if note else '' }}</textarea>
+        <div class="char-count" id="charCount">0 / 10000 characters</div>
+      </div>
+
+      <div class="flex gap-1" style="flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary">
+          {{ '💾 Save Changes' if action == 'Edit' else '🚀 Create Note' }}
+        </button>
+        <a href="{{ url_for('notes.dashboard') }}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function updateCount(el) {
+  document.getElementById('charCount').textContent =
+    el.value.length + ' / 10000 characters';
+}
+// Init on load for edit mode
+window.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('content');
+  if (ta) updateCount(ta);
+});
+</script>
+{% endblock %}

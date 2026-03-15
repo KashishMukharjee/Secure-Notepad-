@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Register – SecureNotepad{% endblock %}
+
+{% block content %}
+<div style="max-width:460px; margin:2.5rem auto;">
+  <div class="card">
+    <div class="text-center" style="margin-bottom:1.8rem;">
+      <div style="font-size:3rem;">📝</div>
+      <h1 style="font-size:1.6rem; margin-top:.5rem;">Create Account</h1>
+      <p style="color:var(--muted); font-size:.9rem; margin-top:.3rem;">Join SecureNotepad today</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.register') }}" id="regForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"
+               placeholder="Choose a username (min 3 chars)" required minlength="3" autofocus />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email"
+               placeholder="you@example.com" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="password" name="password"
+                 placeholder="Create a strong password" required
+                 oninput="checkStrength(this.value)" />
+          <button type="button" onclick="togglePwd('password', this)"
+                  style="position:absolute;right:.8rem;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;">
+            👁
+          </button>
+        </div>
+
+        <!-- Strength Meter -->
+        <div class="strength-bar-wrap">
+          <div class="strength-bar" id="strengthBar"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel" style="color:var(--muted);">
+          Enter a password to check strength
+        </div>
+        <ul class="strength-tips" id="strengthTips"></ul>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm Password</label>
+        <div style="position:relative;">
+          <input type="password" id="confirm_password" name="confirm_password"
+                 placeholder="Repeat your password" required
+                 oninput="checkMatch()" />
+          <button type="button" onclick="togglePwd('confirm_password', this)"
+                  style="position:absolute;right:.8rem;top:50%;transform:translateY(-50%);
+                         background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;">
+            👁
+          </button>
+        </div>
+        <div id="matchMsg" style="font-size:.78rem; margin-top:.3rem;"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full" style="margin-top:.5rem;">
+        🚀 Create Account
+      </button>
+    </form>
+
+    <p class="text-center mt-3" style="font-size:.88rem; color:var(--muted);">
+      Already have an account?
+      <a href="{{ url_for('auth.login') }}" style="color:var(--accent2);">Sign in</a>
+    </p>
+  </div>
+</div>
+
+<script>
+const colors = ['#ef4444','#f97316','#f59e0b','#22c55e','#6c63ff'];
+const labels = ['Very Weak','Weak','Fair','Strong','Very Strong'];
+
+async function checkStrength(pwd) {
+  if (!pwd) {
+    document.getElementById('strengthBar').style.width = '0%';
+    document.getElementById('strengthLabel').textContent = 'Enter a password to check strength';
+    document.getElementById('strengthLabel').style.color = 'var(--muted)';
+    document.getElementById('strengthTips').innerHTML = '';
+    return;
+  }
+  const res = await fetch('/api/check-password', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({password: pwd})
+  });
+  const data = await res.json();
+  const pct = ((data.score) / 5) * 100;
+  const bar = document.getElementById('strengthBar');
+  bar.style.width = pct + '%';
+  bar.style.background = colors[Math.min(data.score, 4)];
+
+  const lbl = document.getElementById('strengthLabel');
+  lbl.textContent = '🔒 Strength: ' + data.label;
+  lbl.style.color = colors[Math.min(data.score, 4)];
+
+  const tips = document.getElementById('strengthTips');
+  tips.innerHTML = data.suggestions.map(s => `<li>${s}</li>`).join('');
+}
+
+function checkMatch() {
+  const p = document.getElementById('password').value;
+  const c = document.getElementById('confirm_password').value;
+  const msg = document.getElementById('matchMsg');
+  if (!c) { msg.textContent = ''; return; }
+  if (p === c) {
+    msg.textContent = '✅ Passwords match';
+    msg.style.color = '#22c55e';
+  } else {
+    msg.textContent = '❌ Passwords do not match';
+    msg.style.color = '#ef4444';
+  }
+}
+
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+</script>
+{% endblock %}
