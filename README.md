@@ -105,8 +105,9 @@ The objective of this project is to demonstrate how a secure web application can
 ## 👨‍💻 Author
 
 **Kashish Mukharjee**
+
+B.Tech CSE 
 Lovely Professional University
-B.Tech CSE
 
 ---
 
